@@ -1,0 +1,12 @@
+db/customer_support.db
+__pycache__/
+.env
+.env.local
+*.env.local
+*.pyc
+checkpoints.db
+.DS_Store
+.venv/
+.pytest_cache/
+*.db-shm
+*.db-wal
