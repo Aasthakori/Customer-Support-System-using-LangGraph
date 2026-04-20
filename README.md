@@ -14,20 +14,6 @@ Supervisor-worker agentic system using LangGraph — 4 ReAct agents, LLM-as-judg
 - **LangSmith** tracing for full observability
 - **Local LLM** — runs on Ollama (Qwen3 8B)
 
-## Getting Started
-
-```bash
-git clone https://github.com/Aasthakori/Customer-Support-System-using-LangGraph.git
-cd Customer-Support-System-using-LangGraph
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-ollama pull qwen3:8b
-cp .env.example .env.local  # add your LangSmith API key
-python db/seed.py --force
-streamlit run app.py
-```
-
 ## Tech Stack
 
 LangGraph · LangChain · Pydantic · SQLite · Streamlit · Ollama · LangSmith
