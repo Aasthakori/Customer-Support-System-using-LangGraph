@@ -227,6 +227,64 @@ def seed_refunds(cur: sqlite3.Cursor, order_ids: list[int]) -> None:
         )
 
 
+# ── edge cases ───────────────────────────────────────────────────────────────
+
+def seed_edge_cases(cur: sqlite3.Cursor) -> None:
+    now = iso(datetime.now())
+
+    # 1. Customer with null email
+    cur.execute(
+        "INSERT INTO customers (name, email, phone, tier, created_at) VALUES (?,?,?,?,?)",
+        ("Edge Case No Email", None, "+919999900001", "bronze", now),
+    )
+    ec1_id = cur.lastrowid
+
+    # 2. Customer with null phone
+    cur.execute(
+        "INSERT INTO customers (name, email, phone, tier, created_at) VALUES (?,?,?,?,?)",
+        ("Edge Case No Phone", "nophone@example.com", None, "silver", now),
+    )
+    ec2_id = cur.lastrowid
+
+    # 3. Order: delivered status but NULL delivery_date (edge case No Email customer)
+    cur.execute(
+        "INSERT INTO orders (customer_id, product_id, quantity, total, status, order_date, delivery_date) VALUES (?,?,?,?,?,?,?)",
+        (ec1_id, 1, 1, 5000.00, "delivered", "2026-03-01", None),
+    )
+    eo1_id = cur.lastrowid
+
+    # 4. Order with delivery date 6 months ago (refund window expired)
+    cur.execute(
+        "INSERT INTO orders (customer_id, product_id, quantity, total, status, order_date, delivery_date) VALUES (?,?,?,?,?,?,?)",
+        (1, 1, 1, 15000.00, "delivered", "2025-08-01", "2025-10-15"),
+    )
+    eo2_id = cur.lastrowid
+
+    # 5. Order with total = 0.00
+    cur.execute(
+        "INSERT INTO orders (customer_id, product_id, quantity, total, status, order_date, delivery_date) VALUES (?,?,?,?,?,?,?)",
+        (1, 1, 1, 0.00, "delivered", "2026-03-15", "2026-04-01"),
+    )
+    eo3_id = cur.lastrowid
+
+    # 6. Customer with zero orders (no order rows inserted for this customer)
+    cur.execute(
+        "INSERT INTO customers (name, email, phone, tier, created_at) VALUES (?,?,?,?,?)",
+        ("Edge Case No Orders", "noorders@example.com", "+919999900003", "bronze", now),
+    )
+    ec3_id = cur.lastrowid
+
+    # 7. Customer with special characters in name
+    cur.execute(
+        "INSERT INTO customers (name, email, phone, tier, created_at) VALUES (?,?,?,?,?)",
+        ("Réné O'Brien-García", "rene.garcia@example.com", "+919999900004", "gold", now),
+    )
+    ec4_id = cur.lastrowid
+
+    print(f"Edge case customers: [{ec1_id}, {ec2_id}, {ec3_id}, {ec4_id}]")
+    print(f"Edge case orders: [{eo1_id}, {eo2_id}, {eo3_id}]")
+
+
 # ── main ─────────────────────────────────────────────────────────────────────
 
 def main() -> None:
@@ -266,6 +324,9 @@ def main() -> None:
     print("Seeding refunds   …", end=" ")
     seed_refunds(cur, order_ids)
     print("done (10)")
+
+    print("Seeding edge cases …", end="\n")
+    seed_edge_cases(cur)
 
     conn.commit()
     conn.close()

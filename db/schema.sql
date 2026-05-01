@@ -3,8 +3,8 @@
 CREATE TABLE IF NOT EXISTS customers (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
     name        TEXT NOT NULL,
-    email       TEXT NOT NULL UNIQUE,
-    phone       TEXT NOT NULL,
+    email       TEXT UNIQUE,
+    phone       TEXT,
     tier        TEXT NOT NULL CHECK(tier IN ('bronze', 'silver', 'gold', 'platinum')),
     created_at  TEXT NOT NULL
 );
@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS orders (
     customer_id   INTEGER NOT NULL REFERENCES customers(id),
     product_id    INTEGER NOT NULL REFERENCES products(id),
     quantity      INTEGER NOT NULL CHECK(quantity > 0),
-    total         REAL NOT NULL CHECK(total > 0),
+    total         REAL NOT NULL CHECK(total >= 0),
     status        TEXT NOT NULL CHECK(status IN ('pending', 'processing', 'shipped', 'delivered', 'cancelled', 'returned')),
     order_date    TEXT NOT NULL,
     delivery_date TEXT
